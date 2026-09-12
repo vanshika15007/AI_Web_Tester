@@ -1,4 +1,5 @@
 import os
+import logging
 from urllib.parse import urlparse
 
 from fastapi import FastAPI, HTTPException
@@ -9,6 +10,7 @@ from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 from ai_service import create_summary
 from tester import check_website
 
+logger = logging.getLogger(__name__)
 app = FastAPI(title="AI Web Tester API")
 allowed_origins = [origin.strip() for origin in os.getenv("FRONTEND_URLS", "").split(",") if origin.strip()]
 allowed_origins.extend(["http://localhost:5173", "http://127.0.0.1:5173"])
@@ -61,4 +63,5 @@ def run_test(request: TestRequest):
     except PlaywrightTimeoutError:
         raise HTTPException(status_code=504, detail="The website took too long to respond.")
     except Exception:
+        logger.exception("Website test failed for %s", request.url)
         raise HTTPException(status_code=502, detail="The website could not be tested. It may be unavailable or too slow.")
