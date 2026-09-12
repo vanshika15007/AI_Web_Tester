@@ -10,9 +10,11 @@ from ai_service import create_summary
 from tester import check_website
 
 app = FastAPI(title="AI Web Tester API")
+allowed_origins = [origin.strip() for origin in os.getenv("FRONTEND_URLS", "").split(",") if origin.strip()]
+allowed_origins.extend(["http://localhost:5173", "http://127.0.0.1:5173"])
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=list(dict.fromkeys(allowed_origins)),
     allow_methods=["*"],
     allow_headers=["*"],
 )
